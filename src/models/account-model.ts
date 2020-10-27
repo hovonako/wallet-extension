@@ -1,5 +1,4 @@
-import * as i from 'incognito-js/build/web/module'
-import { keyBy } from 'lodash'
+import { AccountInstance, PrivacyTokenInstance } from 'incognito-sdk'
 
 export type AccountModelType = {
   name?: string
@@ -9,15 +8,10 @@ export type AccountModelType = {
   paymentAddress?: string
   viewingKey?: string
 
-  balances?: { [key: string]: { availableBallance: any; totalBalance: any } }
-
   followingTokens?: string[]
 }
 
-const getTokenBalances = async (
-  account: i.AccountInstance,
-  tokenId: string
-): Promise<{ tokenId: string; availableBallance: any; totalBalance: any }> => {
+export const getTokenBalances = async (account: AccountInstance, tokenId: string): Promise<{ tokenId: string; availableBallance: any; totalBalance: any }> => {
   if (tokenId === account.nativeToken.tokenId) {
     return {
       tokenId,
@@ -25,7 +19,7 @@ const getTokenBalances = async (
       totalBalance: await account.nativeToken.getTotalBalance(),
     }
   }
-  const pToken = (await account.getFollowingPrivacyToken(tokenId)) as i.PrivacyTokenInstance
+  const pToken = (await account.getFollowingPrivacyToken(tokenId)) as PrivacyTokenInstance
   return {
     tokenId,
     availableBallance: await pToken.getAvaiableBalance(),
@@ -33,7 +27,7 @@ const getTokenBalances = async (
   }
 }
 
-export const serializeAccount = async (account: i.AccountInstance): Promise<AccountModelType> => {
+export const serializeAccount = async (account: AccountInstance): Promise<AccountModelType> => {
   const accountModel: AccountModelType = {}
   accountModel.name = account.name
   accountModel.paymentAddress = account.key.keySet.paymentAddressKeySerialized
@@ -42,7 +36,5 @@ export const serializeAccount = async (account: i.AccountInstance): Promise<Acco
   accountModel.viewingKey = account.key.keySet.viewingKeySerialized
   accountModel.publicKey = await account.getBLSPublicKeyB58CheckEncode()
   accountModel.followingTokens = [...account.privacyTokenIds, account.nativeToken.tokenId]
-  const balances = await Promise.all(accountModel.followingTokens.map((tokenId) => getTokenBalances(account, tokenId)))
-  accountModel.balances = keyBy(balances, 'tokenId')
   return accountModel
 }

@@ -1,0 +1,16 @@
+.paragraph {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #757575;
+  margin-left: 24px;
+}
+.btn {
+  margin-top: 20px;
+}
+.borderContainer {
+  border-color: #e2e2e2;
+  border-radius: 4px;
+  padding: 20px 16px;
+  margin-top: 24px;
+}
